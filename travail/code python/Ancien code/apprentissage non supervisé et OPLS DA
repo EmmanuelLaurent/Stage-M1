@@ -1,0 +1,226 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.cluster import AgglomerativeClustering
+from sklearn import metrics
+from scipy.cluster.hierarchy import dendrogram
+# =============================================================================
+# Importation bdd
+# =============================================================================
+  
+df = pd.read_csv('C:/Users/orkad/Desktop/stage emmanuel/Datasets-20220517T100241Z-001/Datasets/objectif/table_bos.csv')
+del df['Unnamed: 0']
+y = df['Label']
+X = df.drop('Label', axis=1)
+#X = X.astype(bool).astype(int)
+
+# =============================================================================
+# fonction dendrogramme
+# =============================================================================
+
+def llf(id):
+    return y[id]
+
+def plot_dendrogram(model, **kwargs):
+    # Create linkage matrix and then plot the dendrogram
+
+    # create the counts of samples under each node
+    counts = np.zeros(model.children_.shape[0])
+    n_samples = len(model.labels_)
+    for i, merge in enumerate(model.children_):
+        current_count = 0
+        for child_idx in merge:
+            if child_idx < n_samples:
+                current_count += 1  # leaf node
+            else:
+                current_count += counts[child_idx - n_samples]
+        counts[i] = current_count
+
+    linkage_matrix = np.column_stack(
+        [model.children_, model.distances_, counts]
+    ).astype(float)
+
+    # Plot the corresponding dendrogram
+    dendrogram(linkage_matrix, leaf_label_func=llf, **kwargs)
+    
+# =============================================================================
+# clustering
+# =============================================================================
+
+
+clustering = AgglomerativeClustering(distance_threshold=0, n_clusters=None, linkage='ward', affinity='euclidean')
+fit = clustering.fit(X)
+fig = plt.figure()
+plt.title("Hierarchical Clustering Dendrogram")
+plot_dendrogram(fit)
+plt.show()
+
+
+    # =============================================================================
+# Score de silhouette
+# =============================================================================
+
+clustering = AgglomerativeClustering(linkage='ward', affinity='euclidean').fit(X)
+labels=clustering.fit_predict(X)
+labels
+metrics. silhouette_score(X, labels, metric = 'euclidean')
+# =============================================================================
+# 
+# =============================================================================
+from sklearn.cluster import KMeans
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn import datasets
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.datasets import fetch_lfw_people
+from sklearn.metrics import classification_report
+from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.svm import SVC
+from sklearn.utils.fixes import loguniform
+from sklearn.feature_selection import VarianceThreshold, SelectKBest, chi2
+
+# =============================================================================
+# 
+# =============================================================================
+from sklearn.decomposition import PCA
+
+dict_colors = {'Auroch': 'crimson', 'Boeuf': 'royalblue'} 
+y_colors = [dict_colors[yi] for yi in y]
+
+
+model = PCA(n_components=2)
+X_reduced = model.fit_transform(X)
+plt.Figure(figsize=(100,100))
+plt.scatter(X_reduced[:,0], X_reduced[:,1], c=y_colors)
+
+
+# =============================================================================
+# 
+# =============================================================================
+
+from sklearn.manifold import TSNE
+
+# 2D #
+tsne = TSNE(n_components=2, init='pca', perplexity=45, random_state=10, n_jobs=-1)
+X_tsne = tsne.fit_transform(X)
+
+columns = ['DIM' + str(c) for c in range(1, X_tsne.shape[1]+1, 1)]
+X_tsne = pd.DataFrame(X_tsne, index=X.index, columns=columns)
+X_tsne.head()
+
+X_tsne.plot(x='DIM1', y='DIM2', kind='scatter', figsize=(5, 5), color=y_colors)
+tsne.kl_divergence_
+
+# 3D #
+tsne = TSNE(n_components=3, init='pca', perplexity=45, random_state=0, n_jobs=-1)
+X_tsne = tsne.fit_transform(X)
+
+columns = ['DIM' + str(c) for c in range(1, X_tsne.shape[1]+1, 1)]
+X_tsne = pd.DataFrame(X_tsne, index=X.index, columns=columns)
+X_tsne.head()
+
+fig = plt.figure(figsize=(5, 5))
+ax = fig.add_subplot(projection='3d')
+ax.scatter(X_tsne['DIM1'], X_tsne['DIM2'], X_tsne['DIM3'], marker='o', s=30, edgecolor='k', facecolor=y_colors)
+ax.set_xlabel('DIM1')
+ax.set_ylabel('DIM2')
+ax.set_zlabel('DIM3')
+ax.view_init(elev=15, azim=45)
+
+# =============================================================================
+# 
+# =============================================================================
+
+import umap
+
+# 2D #
+
+embedding = umap.UMAP(n_components=2, random_state=0, n_jobs=-1)
+X_umap = embedding.fit_transform(X)
+columns = ['DIM' + str(c) for c in range(1, X_umap.shape[1]+1, 1)]
+X_umap = pd.DataFrame(X_umap, index=X.index, columns=columns)
+
+X_umap.plot(x='DIM1', y='DIM2', kind='scatter', figsize=(5, 5), color=y_colors)
+
+# 3D #
+
+embedding = umap.UMAP(n_components=3, random_state=0, n_jobs=-1)
+X_umap = embedding.fit_transform(X)
+columns = ['DIM' + str(c) for c in range(1, X_umap.shape[1]+1, 1)]
+X_umap = pd.DataFrame(X_umap, index=X.index, columns=columns)
+fig = plt.figure(figsize=(5, 5))
+ax = fig.add_subplot(projection='3d')
+ax.scatter(X_umap['DIM1'], X_umap['DIM2'], X_umap['DIM3'], marker='o', s=30, edgecolor='k', facecolor=y_colors)
+ax.set_xlabel('DIM1')
+ax.set_ylabel('DIM2')
+ax.set_zlabel('DIM3')
+ax.view_init(elev=15, azim=45)
+
+# =============================================================================
+# 
+# =============================================================================
+from sklearn.model_selection import cross_val_predict, LeaveOneOut
+from sklearn.metrics import r2_score, accuracy_score
+from pyopls import OPLS
+from sklearn.cross_decomposition import PLSRegression
+from sklearn.metrics import roc_curve, roc_auc_score
+
+spectra = X.astype('float32')
+target = y.apply(lambda x: 1 if x == 'Auroch' else -1)
+opls = OPLS()
+Z = opls.fit_transform(spectra, target)
+
+pls = PLSRegression(1)
+y_pred = cross_val_predict(pls, spectra, target, cv=LeaveOneOut())
+q_squared = r2_score(target, y_pred)  
+dq_squared = r2_score(target, np.clip(y_pred, -1, 1))  
+accuracy = accuracy_score(target, np.sign(y_pred))  
+
+
+processed_y_pred = cross_val_predict(pls, Z, target, cv=LeaveOneOut())
+processed_q_squared = r2_score(target, processed_y_pred)  
+processed_dq_squared = r2_score(target, np.clip(processed_y_pred, -1, 1))  
+processed_accuracy = accuracy_score(target, np.sign(processed_y_pred))  
+
+r2_X = opls.score(spectra)  
+
+fpr, tpr, thresholds = roc_curve(target, y_pred)
+roc_auc = roc_auc_score(target, y_pred)
+proc_fpr, proc_tpr, proc_thresholds = roc_curve(target, processed_y_pred)
+proc_roc_auc = roc_auc_score(target, processed_y_pred)
+
+plt.figure(0)
+plt.plot(fpr, tpr, lw=2, color='blue', label=f'Unprocessed (AUC={roc_auc:.4f})')
+plt.plot(proc_fpr, proc_tpr, lw=2, color='red',
+         label=f'39-component OPLS (AUC={proc_roc_auc:.4f})')
+plt.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC Curve')
+plt.legend(loc='lower right')
+plt.show()
+
+plt.figure(1)
+pls.fit(Z, target)
+df = pd.DataFrame(np.column_stack([pls.x_scores_, opls.T_ortho_[:, 0]]),
+                  index=spectra.index, columns=['t', 't_ortho'])                           
+pos_df = df[target==1]
+neg_df = df[target==-1]
+plt.scatter(neg_df['t'], neg_df['t_ortho'], c='blue', label='Boeuf')
+plt.scatter(pos_df['t'], pos_df['t_ortho'], c='red', label='Auroch')
+plt.title('PLS Scores')
+plt.xlabel('t_ortho')
+plt.ylabel('t')
+plt.legend(loc='upper right')
+plt.show()  
+
+# =============================================================================
+# 
+# =============================================================================

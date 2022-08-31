@@ -1,0 +1,45 @@
+from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import SMOTE
+from sklearn.datasets import make_classification
+import numpy as np
+import pandas as pd
+from tpot import TPOTClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+
+BDD = pd.read_excel('C:/Users/orkad/Desktop/stage emmanuel/Datasets-20220517T100241Z-001/Datasets/2-data_ossements/2-2 custom/feature_table_mzwid_0.019_minfrac_0_no_int.xlsx')
+BDD2 = BDD
+del BDD2['label']
+y = BDD2['feature']
+X = BDD2.drop('feature', axis=1)
+
+# =============================================================================
+# randomoversampler
+# =============================================================================
+ros = RandomOverSampler(random_state=0)
+X, y = ros.fit_resample(X, y)
+y, uniques = pd.factorize(y) # on appel une autre variale afin d'y inclure l'Index
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.75, test_size=0.25, random_state=0, stratify=y)
+
+tpot = TPOTClassifier(n_jobs=-1, verbosity=3,  max_time_mins=45)
+tpot.fit(X_train, y_train)
+print(tpot.score(X_test, y_test))
+tpot.export('C:/Users/orkad/Desktop/stage emmanuel/travail/code python/tpot_pipeline_test_oversampling.py')
+print(tpot.evaluated_individuals_)
+
+# =============================================================================
+# Smote oversampler
+# =============================================================================
+
+sm = SMOTE(sampling_strategy='auto', random_state=None, k_neighbors=2, n_jobs=None)
+X, y = sm.fit_resample(X, y)
+y, uniques = pd.factorize(y) # on appel une autre variale afin d'y inclure l'Index
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.75, test_size=0.25, random_state=0, stratify=y)
+
+tpot = TPOTClassifier(n_jobs=-1, verbosity=3,  max_time_mins=45)
+tpot.fit(X_train, y_train)
+print(tpot.score(X_test, y_test))
+tpot.export('C:/Users/orkad/Desktop/stage emmanuel/travail/code python/tpot_pipeline_test_oversampling.py')
+print(tpot.evaluated_individuals_)

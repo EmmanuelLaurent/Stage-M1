@@ -1,0 +1,99 @@
+from tpot import TPOTClassifier
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn import datasets
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.datasets import fetch_lfw_people
+from sklearn.metrics import classification_report
+from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.svm import SVC
+from sklearn.utils.fixes import loguniform
+from sklearn.preprocessing import normalize
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import metrics
+
+# =============================================================================
+# Importation bdd
+# =============================================================================
+
+df = pd.read_csv('C:/Users/orkad/Desktop/stage emmanuel/Datasets-20220517T100241Z-001/Datasets/objectif/table_cervus.csv')
+del df['Unnamed: 0']
+y = df['Label']
+X = df.drop('Label', axis=1)
+#X = X.astype(bool).astype(int)
+
+
+# =============================================================================
+# split de la bdd
+# =============================================================================
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.75, test_size=0.25, stratify=y)
+print(X_train.shape)
+print(X_test.shape)
+
+# =============================================================================
+# knn
+# =============================================================================
+
+model = KNeighborsClassifier()
+model.fit(X_train,y_train)
+y_pred=model.predict(X_test)
+print('train score:', model.score(X_train, y_train))
+print('test score:', model.score(X_test, y_test))
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print("f-mesure:",metrics.f1_score(y_test, y_pred, average=None))
+print(metrics.classification_report(y_test, y_pred))
+
+# =============================================================================
+# 
+# =============================================================================
+
+
+clf=RandomForestClassifier(n_estimators=100,random_state=0)
+clf.fit(X_train,y_train)
+y_pred=clf.predict(X_test)
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print("f-mesure:",metrics.f1_score(y_test, y_pred, average='micro'))
+print(metrics.classification_report(y_test, y_pred))
+print('train score:', clf.score(X_train, y_train))
+print('test score:', clf.score(X_test, y_test))
+
+# =============================================================================
+# 
+# =============================================================================
+ 
+
+# =============================================================================
+# 
+# =============================================================================
+from sklearn.neural_network import MLPClassifier
+
+MLP = MLPClassifier(alpha=0.001, learning_rate_init=0.05)
+MLP.fit(X_train,y_train)
+y_pred=MLP.predict(X_test)
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print("f-mesure:",metrics.f1_score(y_test, y_pred, average= 'micro'))
+print(metrics.classification_report(y_test, y_pred))
+print('train score:', MLP.score(X_train, y_train))
+print('test score:', MLP.score(X_test, y_test))
+
+import eli5 as eli
+
+eli.show_weights ( model )
+# =============================================================================
+# 
+# =============================================================================
+from sklearn.pipeline import make_pipeline
+from sklearn.feature_extraction.text import CountVectorizer
+
+clf=RandomForestClassifier(n_estimators=100,random_state=0)
+vec = CountVectorizer()
+pipe = make_pipeline(vec, clf)
+pipe.fit(X_train, y_train)
